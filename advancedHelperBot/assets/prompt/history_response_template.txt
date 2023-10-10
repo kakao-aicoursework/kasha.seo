@@ -1,0 +1,12 @@
+지금까지 대화한 내용인 <chat_history>를 참고하여 <message>에 답변할수 있는지 확인하고,
+답변할 수 있다면 <message>에 답변을 입력하고, 답변할 수 없다면 "Search"라고 답변하시오.
+
+<chat_history>
+{chat_history}
+</chat_history>
+
+<message>
+{user_message}
+</message>
+    
+history_answer:

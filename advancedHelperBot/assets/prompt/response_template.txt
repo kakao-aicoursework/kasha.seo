@@ -4,10 +4,6 @@ Your job is to read the <message>, Answer the question with <context> very detai
 {related_documents}
 </related_documents>
 
-<chat_history>
-{chat_history}
-</chat_history>
-
 <message>
 {user_message}
 </message>

@@ -19,6 +19,7 @@ from . import chatHistory
 INTENT_PATH = "./assets/prompt/intent.txt"
 PARSE_INTENT_PATH = "./assets/prompt/parse_intent.txt"
 RESPONSE_TEMPLATE_PATH = "./assets/prompt/response_template.txt"
+HISTORY_RESPONSE_TEMPLATE_PATH = "./assets/prompt/history_response_template.txt"
 HISTORY_DIR = "./chat_histories"
 
 def create_chain(llm, template, output_key):
@@ -46,6 +47,12 @@ response_chain = create_chain(
     output_key="answer"
 )
 
+history_response_chain = create_chain(
+    llm=llm,
+    template=HISTORY_RESPONSE_TEMPLATE_PATH,
+    output_key="history_answer"
+)
+
 def generate_answer(user_message, conversation_id: str='fa1010') -> dict[str, str]:
     history_file = chatHistory.load_conversation_history(conversation_id)
 
@@ -54,13 +61,15 @@ def generate_answer(user_message, conversation_id: str='fa1010') -> dict[str, st
     context["intent_list"] = fileLoader.read_prompt_template(INTENT_PATH)
     context["chat_history"] = chatHistory.get_chat_history(conversation_id)
 
-    intent = parse_intent_chain.run(context)
-    print("intent: " + intent)
-    if intent == "default":
-        answer = default_chain.run(context["user_message"])
-    else:
-        context["related_documents"] = chroma.query_db(context["user_message"])
-        answer = response_chain.run(context)
+    answer = history_response_chain.run(context)
+    if (answer == "Search"):
+        intent = parse_intent_chain.run(context)
+        print("intent: " + intent)
+        if intent == "default":
+            answer = default_chain.run(context["user_message"])
+        else:
+            context["related_documents"] = chroma.query_db(context["user_message"])
+            answer = response_chain.run(context)
 
     chatHistory.log_user_message(history_file, user_message)
     chatHistory.log_bot_message(history_file, answer)
